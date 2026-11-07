@@ -67,7 +67,7 @@ public final class YouTubeEngine: NSObject, WKScriptMessageHandler {
         config.userContentController = userContentController
 
         // 3. Biên dịch WKContentRuleList để chặn quảng cáo tầng mạng
-        WKContentRuleListStore.default().compileContentRuleList(
+        WKContentRuleListStore.default()?.compileContentRuleList(
             forIdentifier: "CarTubeAdBlockRules",
             encodedContentRuleList: contentBlockerRulesJSON
         ) { ruleList, _ in

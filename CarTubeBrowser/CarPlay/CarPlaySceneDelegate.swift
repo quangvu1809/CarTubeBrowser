@@ -34,12 +34,11 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
         self.interfaceController = interfaceController
         SharedWebStore.shared.isCarPlayConnected = true
 
-        // Nếu CarPlay cấp scene window ẩn, gắn luôn WebViewController vào để hiển thị video
-        if let sceneWindow = templateApplicationScene.carWindow {
-            self.carWindow = sceneWindow
-            sceneWindow.rootViewController = CarTubeWebViewController(isCarDisplayMode: true)
-            sceneWindow.makeKeyAndVisible()
-        }
+        // Gắn luôn WebViewController vào carWindow của CPTemplateApplicationScene để hiển thị video
+        let sceneWindow = templateApplicationScene.carWindow
+        self.carWindow = sceneWindow
+        sceneWindow.rootViewController = CarTubeWebViewController(isCarDisplayMode: true)
+        sceneWindow.makeKeyAndVisible()
 
         setupAPTVStyleTemplates(on: interfaceController)
     }
