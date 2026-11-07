@@ -1,0 +1,64 @@
+name: Build CarTubeBrowser IPA (No Certificate Required)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      signing_mode:
+        description: 'Chế độ đóng gói IPA (free = Sideloadly/AltStore không cần chứng chỉ, entitlements = Kèm quyền CarPlay đầy đủ cho ESign/TrollStore)'
+        required: true
+        default: 'free'
+        type: choice
+        options:
+          - free
+          - entitlements
+
+jobs:
+  build-ipa:
+    runs-on: macos-14
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen & ldid
+        run: |
+          brew install xcodegen ldid
+
+      - name: Generate Xcode Project
+        run: |
+          xcodegen generate
+
+      - name: Build Unsigned iOS App
+        run: |
+          xcodebuild clean build \
+            -project CarTubeBrowser.xcodeproj \
+            -scheme CarTubeBrowser \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Package IPA (Standard & Full CarPlay Entitlements)
+        run: |
+          mkdir -p Payload
+          cp -r build/Build/Products/Release-iphoneos/CarTubeBrowser.app Payload/
+
+          # Bản 1: Dành cho Sideloadly / AltStore / SideStore (Tự ký bằng Apple ID miễn phí, không yêu cầu chứng chỉ đặc biệt)
+          ldid -S Payload/CarTubeBrowser.app/CarTubeBrowser
+          zip -r9 CarTubeBrowser-FreeAppleID.ipa Payload
+
+          # Bản 2: Đính kèm sẵn CarPlay Entitlements (Dành cho ESign / KSign / Feather / TrollStore)
+          ldid -SCarTubeBrowser/App/CarTubeBrowser.entitlements Payload/CarTubeBrowser.app/CarTubeBrowser
+          zip -r9 CarTubeBrowser-FullCarPlay.ipa Payload
+
+      - name: Upload IPA Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: CarTubeBrowser-IPA-Files
+          path: |
+            CarTubeBrowser-FreeAppleID.ipa
+            CarTubeBrowser-FullCarPlay.ipa
+          retention-days: 30
