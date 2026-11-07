@@ -14,6 +14,9 @@ on:
           - free
           - entitlements
 
+permissions:
+  contents: write
+
 jobs:
   build-ipa:
     runs-on: macos-latest
@@ -62,3 +65,18 @@ jobs:
             CarTubeBrowser-FreeAppleID.ipa
             CarTubeBrowser-FullCarPlay.ipa
           retention-days: 30
+
+      - name: Publish Direct Download IPA to GitHub Releases (For iPhone Safari)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v2.0.0-latest
+          name: "CarTube TV IPA (Tải trực tiếp trên iPhone)"
+          body: |
+            ### Tải trực tiếp trên iPhone (Safari):
+            - **CarTubeBrowser-FullCarPlay.ipa**: Cài trực tiếp trên iPhone qua **ESign / KSign / Scarlet / Feather / TrollStore** (Có đầy đủ quyền CarPlay).
+            - **CarTubeBrowser-FreeAppleID.ipa**: Cài qua **SideStore / AltStore / Sideloadly** bằng Apple ID miễn phí.
+          files: |
+            CarTubeBrowser-FreeAppleID.ipa
+            CarTubeBrowser-FullCarPlay.ipa
+          prerelease: false
+          make_latest: true
